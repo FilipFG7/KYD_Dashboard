@@ -1,36 +1,24 @@
 #libraries for building the webapp page
 import pandas as pd
 import numpy as np
-from logging import PlaceHolder
 from pydoc import classname
 import dash
 from dash import Dash, html, dcc, Input, Output, callback, State, dash_table
-import dash_bootstrap_components as dbc
-import plotly.express as px 
-#import pages_plugin
+import dash_bootstrap_components as dbc 
 import dash_labs as dl
-import dash_auth
-from numpy import size 
-from ctypes import alignment
 # libraries for machine learning
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import  accuracy_score
 import wrapt
 #libraries to save the excel file uploaded on webapp
 import base64
-import datetime
 import io
-import json
-
 # inserting this page into the webapp built in different code
 dash.register_page(__name__, path="/")
-
 # text displayed on the page
 upload_info= '''
 #### **Please upload the excel file with customer's data to predict the income range.**
 '''
-
 # page layout
 def layout():
     return dbc.Container(
@@ -70,12 +58,11 @@ def layout():
                     ),               
                 ]),
                     width={'size':5}),
+                #confirmation text that the file was uploaded
                 dbc.Col(html.Div(id='output-file'))
             ]),
             
-            dbc.Row([
-                #dbc.Col(html.Div(id='results')                   
-                #),                
+            dbc.Row([                
                 dbc.Col(html.Div(children=[
                     html.Br(),
                     # button that starts the machine learning function
@@ -83,17 +70,13 @@ def layout():
                     'width':'160px', 'height':'40px','background-color':'#F2F2F2', 'color':'#262626','borderRadius': '7px'}),
                     html.Br()
                 ]),
-                    #align='end',
                     width={'size':3, 'order':2}
-                ),
-                
+                ),                
             ]),
             dbc.Row([
                 dbc.Col(html.Div(id='results'), width={'size':8, "offset": 2}                   
                 ),
-
-            ]),
-                  
+            ]),                 
         ],fluid=True
     )
 
@@ -105,7 +88,11 @@ def machine_learning():
     df1=pd.read_excel(r'C:\Users\Filip\Desktop\Codes\KYD-Dashboard\Customer.xlsx')
 
     # Cleaning up the data
-    columns=['Kidhome','Teenhome','Recency','NumDealsPurchases','NumWebPurchases','NumCatalogPurchases','NumStorePurchases','NumWebVisitsMonth','AcceptedCmp3','AcceptedCmp4','AcceptedCmp5','AcceptedCmp1','AcceptedCmp2','Complain','Z_CostContact','Z_Revenue','Response','Age','Customer_Days','marital_Divorced','marital_Married','marital_Single','marital_Together','marital_Widow','education_2n Cycle','education_Basic','education_Graduation','education_Master','education_PhD','AcceptedCmpOverall']
+    columns=['Kidhome','Teenhome','Recency','NumDealsPurchases','NumWebPurchases','NumCatalogPurchases',
+             'NumStorePurchases','NumWebVisitsMonth','AcceptedCmp3','AcceptedCmp4','AcceptedCmp5','AcceptedCmp1',
+             'AcceptedCmp2','Complain','Z_CostContact','Z_Revenue','Response','Age','Customer_Days','marital_Divorced',
+             'marital_Married','marital_Single','marital_Together','marital_Widow','education_2n Cycle','education_Basic',
+             'education_Graduation','education_Master','education_PhD','AcceptedCmpOverall']
     df = df.drop(columns, axis=1)
     df["Income"]=np.where((df["Income"] <10000) & (df['Income'] > 0), 0, df['Income'])
     df["Income"]=np.where((df["Income"] <20000) & (df['Income'] > 10000), 1, df['Income'])
@@ -129,11 +116,7 @@ def machine_learning():
     #Random Forest Classifier model
     model = RandomForestClassifier(n_estimators=600, min_samples_split=5, min_samples_leaf= 1, max_depth= 80, bootstrap= True)
     model.fit(xtrain, ytrain)
-
-    #Accurcy metrics
-    score = model.score(xtest, ytest)
-    #print(score)
-
+       
     # Adding and changing the new value for Income
     # to the second dataframe and creating an excel file
     k=model.predict(df1)
@@ -149,16 +132,14 @@ def machine_learning():
     df1['Income']=df1['Income'].replace(8, '80k-90k')
     df1['Income']=df1['Income'].replace(9,'90k-100k')
     df1['Income']=df1['Income'].replace(10,'More than 100k')
-    df1.to_excel("./Predict.xlsx",index=False)
 
-    #Adjust the excel file
+    #Adjust the dataframe
     columns1 =['MntWines','MntFruits','MntMeat','MntFish','MntSweet','MntGold','MntRegularProds']
     df1.insert(0, 'Customer', range(1, 1 + len(df1)))
     df1=df1.drop(columns1, axis=1)
    
     # create a dash table
-    table = dbc.Table.from_dataframe(df1, striped=True, bordered=True)
-    
+    table = dbc.Table.from_dataframe(df1, striped=True, bordered=True)   
     return html.Div([
         html.Br(),
         html.H4('This is the prediction of the customers income and the amount of total items bought',className='text-center'),
@@ -183,8 +164,7 @@ def parse_contents(contents, filename):
         return html.Div([
             'There was an error processing this file.'
         ])
-    return html.Div([
-        #html.Br(),        
+    return html.Div([        
         html.H4(
             children='Your data has been saved. To see the expected income of the customer, please press the button.',
             style={'padding-top':'8px','borderRadius': '9px','width':'6','textSize':'100%','textAlign': 'center','background-color':'#262626', 'height':'70px', 'color':'#F2F2F2'}
