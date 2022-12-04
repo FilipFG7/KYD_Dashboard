@@ -1,11 +1,8 @@
 # importing the libraries
-from ctypes import alignment
 import dash
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
-from numpy import size  
 import pandas as pd   
-import plotly.express as px 
 import dash_labs as dl
 
 # app creation in dash
@@ -17,13 +14,10 @@ dropdown=dbc.DropdownMenu(
                     dbc.DropdownMenuItem(page["name"], href=page["path"])
                     for page in dash.page_registry.values()
                     if page["module"] != "pages.not_found_404"
-
                 ],
                 nav=True,
                 label="More pages",
-                in_navbar=True,
-                
-                
+                in_navbar=True,                
             )
 # creating a responsive header for the webapp
 navbar = dbc.Navbar(
